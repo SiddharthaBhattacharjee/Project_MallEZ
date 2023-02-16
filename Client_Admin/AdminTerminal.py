@@ -251,6 +251,5 @@ while True:
    print("2 => getBusinessBalance(business_id) : requires input (Business ID of mall) , returns balance aquired by the mall")
    print("3 => resetBusinessBalance(business_id) :  requires input (Business ID of mall),  resets the balance of business back to zero")
 
-   
 result = contract.functions.getUserIDs().call()
 print(result)
