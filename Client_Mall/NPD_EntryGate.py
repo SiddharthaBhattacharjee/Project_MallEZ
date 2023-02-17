@@ -11,7 +11,7 @@ def most_frequent(List):
 # Load the cascade for detecting number plates
 plate_cascade = cv2.CascadeClassifier('.\haarcascade_plate_number.xml')
 
-#get wifi password
+#get database password
 with open("./dbp.txt",'r') as dbpf:
     pw = dbpf.read()
     dbpf.close()
