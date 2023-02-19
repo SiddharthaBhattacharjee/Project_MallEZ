@@ -9,6 +9,9 @@ from web3 import Web3
 def most_frequent(List):
     return max(set(List) , key = List.count)
 
+#BUSINESS ID
+Business_ID = 18002086633
+
 #Blockchain provider
 provider = Web3.HTTPProvider('https://liberty20.shardeum.org/')
 w3 = Web3(provider)
@@ -253,7 +256,7 @@ contract = w3.eth.contract(address=contract_address, abi=contract_abi)
 
 sender_address = Web3.toChecksumAddress("0x509DdF2bd836Aff26790a51B33A6fE33bE587674")
 w3.eth.defaultAccount = sender_address
-result = contract.functions.getUserIDs().call()
+nonce = w3.eth.getTransactionCount(sender_address)
 
 # Load the cascade for detecting number plates
 plate_cascade = cv2.CascadeClassifier('.\haarcascade_plate_number.xml')
@@ -315,18 +318,46 @@ while True:
             nlist.clear()
             uid = uid.replace(" ","")
             uid = uid.lower()
-            if uid in result:
-                try:
-                    st = "INSERT INTO data(user_id,time) values('{}','{}')".format(uid,now)
-                    cur.execute(st)
-                    conn.commit()
-                    print("User registered, open the gate.")
-                except:
-                    print("Failed To Add Data to database! Please Try Again")
+
+            cur.execute("select * from data")
+            Car_data = cur.fetchall()
+            count = cur.rowcount
+            found = 0
+            duration = 0
+            charge = 0
+
+            for i in Car_data:
+               if uid == i[0]:
+                  duration = now - int(i[1]);
+                  duration = duration//3600
+                  charge = 40 + duration * 10
+                  # uid, Business_ID, charge
+                  try: 
+                     transaction = contract.functions.transferBalanceFromUserToBusiness(uid,Business_ID,charge).buildTransaction({
+                         'gas': 2000000,
+                         'gasPrice': w3.toWei('50', 'gwei'),
+                         'nonce': w3.eth.getTransactionCount(sender_address),
+                     })
+
+                     # Sign and send the transaction
+                     signed_txn = w3.eth.account.signTransaction(transaction, private_key='1bc9616d0c1916ae1f32d0af29e88fb41eb01db2a16371bbe821f752b3d21d7a')
+                     tx_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+                     print(tx_hash)
+                     print("Transaction Completed Successfully.")
+                     found = 1
+                  except Exception as e:
+                     print("Transaction Failed!",e)
+                  
+            if found:
+               print(f"Vehicle No. {uid} , charge : {charge}, vahicles left : {count-1}")
+               st2 = f"delete from data where user_id = '{uid}'"
+               cur.execute(st2)
+               conn.commit()
+               time.sleep(10)
             else:
-                print("User not found")
-            result = contract.functions.getUserIDs().call()
-            time.sleep(10)
+               print("error, please try again")
+               time.sleep(4)
             
     # Display the resulting frame
     cv2.imshow('Number Plate Detection', frame)
