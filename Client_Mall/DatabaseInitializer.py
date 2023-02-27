@@ -11,4 +11,4 @@ def create_database(password):
    conn.autocommit = True
    mycursor.execute("create database mallDatabase")
    mycursor.execute("use mallDatabase")
-   mycursor.execute("create table data(user_id varchar(20) primary key ,time varchar(40))")
+   mycursor.execute("create table data(user_id varchar(20) primary key ,time varchar(40), Pspace varchar(10) )")

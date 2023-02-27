@@ -9,6 +9,8 @@ from web3 import Web3
 def most_frequent(List):
     return max(set(List) , key = List.count)
 
+#parking spaces
+Parking_Spaces = [1,2,3,4,5,6,7,8,9]
 #Blockchain provider
 provider = Web3.HTTPProvider('https://liberty20.shardeum.org/')
 w3 = Web3(provider)
@@ -272,6 +274,16 @@ except:
     time.sleep(4)
     conn=sql.connect(host='localhost',user='root',passwd=pw,database='mallDatabase',charset='utf8')
     cur = conn.cursor()
+
+TakenPS = []
+"""
+try:
+    cur.execute("select Pspace from data")
+    TakenPS = cur.fetchall()
+    print(TakenPS)
+
+except Exception as e:
+    print(e)"""
 
 # Start the webcam
 cap = cv2.VideoCapture(0)
